@@ -170,5 +170,6 @@ data Aluno = Yan Int | Renato String | GuiGo Float
 data Tree a = Leaf | Branch a (Tree a) (Tree a)
         deriving Show
 
+depth :: (Num a1, Ord a1) => Tree a2 -> a1
 depth Leaf = 0
 depth (Branch _ ae ad) = 1 + max (depth ae) (depth ad)
