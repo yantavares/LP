@@ -1,4 +1,7 @@
 import Data.List
+import Data.Char
+
+import Data.String
 
 type Medicamento = String
 
@@ -170,18 +173,28 @@ planoValido p = sort [a | (a, b) <- p] == [a | (a, b) <- p] && checkTime ([b | (
 
  Defina a função "plantaoValido" que verifica as propriedades acima e cujo tipo é dado abaixo:
 
-plantao1 :: Plantao
-plantao1 =
-  [ (6, [Medicar med6]),
-    (8, [Medicar med4]),
-    (17, [Medicar med4]),
-    (22, [Medicar med7])
-  ]
+
 
  -}
 
+remediosPlantao plantao = map snd plantao
+
+horarioPlantao plantao = map fst plantao
+
+medicarLimpo [] = []
+medicarLimpo remedios = map (map (\(Medicar m) -> m)) remedios
+comprarLimpo [] = []
+comprarLimpo remedios = map (map (\(Comprar m _) -> m)) remedios
+
+checkRemedios [] = True
+checkRemedios (a:as)
+    | a == sort a && isUniqueSorted (sort a) && checkRemedios as = True
+    | otherwise = False
+
+checkUnique remedios = [(a,b) | a <- medicarLimpo remedios, b <- comprarLimpo remedios]
+
 plantaoValido :: Plantao -> Bool
-plantaoValido [] = True
+plantaoValido plantao = isUniqueSorted (horarioPlantao plantao)
 
 {-
    QUESTÃO 7  VALOR: 1,0 ponto
