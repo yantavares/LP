@@ -64,6 +64,7 @@ Caso o remédio ainda não exista no estoque, o novo estoque a ser retornado dev
 
 -}
 
+
 findMed :: Eq t => t -> [t] -> Bool
 findMed _ [] = False
 findMed n (x:xs)
@@ -177,24 +178,47 @@ planoValido p = sort [a | (a, b) <- p] == [a | (a, b) <- p] && checkTime ([b | (
 
  -}
 
-remediosPlantao plantao = map snd plantao
 
-horarioPlantao plantao = map fst plantao
+hora plantao = map fst plantao
 
-medicarLimpo [] = []
-medicarLimpo remedios = map (map (\(Medicar m) -> m)) remedios
-comprarLimpo [] = []
-comprarLimpo remedios = map (map (\(Comprar m _) -> m)) remedios
+item :: [(a, b)] -> [b]
+item plantao = map snd plantao
+medicarLista :: [(a, [Cuidado])] -> [[Cuidado]]
+medicarLista plantao = map (filter medicarConst ) (item plantao)
+comprarLista :: [(a, [Cuidado])] -> [[Cuidado]]
+comprarLista plantao = map (filter comprarConst) (item plantao)
+medicarConst :: Cuidado -> Bool
+medicarConst (Medicar _) = True
+medicarConst _ = False
+comprarConst (Comprar _ _) = True
+comprarConst _ = False
+medicarLimpo plantao = map (map (\(Medicar m) -> m)) (medicarLista plantao)
+comprarLimpo plantao = map (map (\(Comprar m _) -> m)) (comprarLista plantao)
+tudoLimpo [] _ = []
+tudoLimpo (a:as) (b:bs) = (a,b) : tudoLimpo (as) (bs)
 
 checkRemedios [] = True
 checkRemedios (a:as)
-    | a == sort a && isUniqueSorted (sort a) && checkRemedios as = True
+    | a == sort a && isUniqueSorted (sort a) && checkRemedios as= True
     | otherwise = False
 
-checkUnique remedios = [(a,b) | a <- medicarLimpo remedios, b <- comprarLimpo remedios]
+makeList plantao = tudoLimpo (medicarLimpo plantao) (comprarLimpo plantao)
+
+checkUnique (a,[]) = True
+checkUnique ([a], b) = not (findMed a b) 
+checkUnique ((a:as), b)
+    | findMed a b || checkUnique (as, b) = False
+    | otherwise = True
+  
+checkUniqueAll plantao = map checkUnique (makeList plantao)
+
+isAllTrue :: [Bool] -> Bool
+isAllTrue [] = True
+isAllTrue (a:as) = a == True && isAllTrue as
+
 
 plantaoValido :: Plantao -> Bool
-plantaoValido plantao = isUniqueSorted (horarioPlantao plantao)
+plantaoValido plantao = sort (hora plantao) == hora plantao && isUniqueSorted (hora plantao) && checkRemedios (comprarLimpo (plantao)) && checkRemedios (medicarLimpo (plantao)) && isAllTrue (checkUniqueAll (plantao))
 
 {-
    QUESTÃO 7  VALOR: 1,0 ponto
