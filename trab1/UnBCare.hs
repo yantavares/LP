@@ -248,8 +248,8 @@ rmdups (x:xs)
     | x `elem` xs = rmdups xs
     | otherwise = x : rmdups xs
 
-soHorarios :: Ord a1 => [(a2, [a1])] -> [a1]
-soHorarios receituario = rmdups (sort (concat [y | y <- map snd receituario]))
+soChaves :: Ord a1 => [(a2, [a1])] -> [a1]
+soChaves receituario = rmdups (sort (concat [y | y <- map snd receituario]))
 
 grupo :: Eq t => t -> [(a, [t])] -> [a]
 grupo _ [] = []
@@ -261,13 +261,13 @@ grupoItens :: Eq t => [t] -> [(a, [t])] -> [[a]]
 grupoItens [] _ = []
 grupoItens (a:as) receituario = grupo a receituario : grupoItens as receituario
 
-fazReceita :: [a] -> [b] -> [(a, b)]
-fazReceita [] _ = []
-fazReceita _ [] = []
-fazReceita (a:as) (b:bs) = (a, b) : fazReceita (as) (bs)
+receitaPlano :: [a] -> [b] -> [(a, b)]
+receitaPlano [] _ = []
+receitaPlano _ [] = []
+receitaPlano (a:as) (b:bs) = (a, b) : receitaPlano (as) (bs)
 
 geraPlanoReceituario :: Receituario -> PlanoMedicamento
-geraPlanoReceituario receituario = fazReceita (soHorarios receituario) ( grupoItens (soHorarios receituario) receituario)
+geraPlanoReceituario receituario = receitaPlano (soChaves receituario) ( grupoItens (soChaves receituario) receituario)
 
 {- QUESTÃO 8  VALOR: 1,0 ponto
 
@@ -280,7 +280,7 @@ geraPlanoReceituario receituario = fazReceita (soHorarios receituario) ( grupoIt
 -}
 
 geraReceituarioPlano :: PlanoMedicamento -> Receituario
-geraReceituarioPlano = undefined
+geraReceituarioPlano plano = receitaPlano (soChaves plano) ( grupoItens (soChaves plano) plano)
 
 {-  QUESTÃO 9 VALOR: 1,0 ponto
 
