@@ -178,8 +178,8 @@ planoValido p = sort [a | (a, b) <- p] == [a | (a, b) <- p] && checkTime ([b | (
  -}
 
 
+hora :: [(b1, b2)] -> [b1]
 hora plantao = map fst plantao
-
 item :: [(a, b)] -> [b]
 item plantao = map snd plantao
 medicarLista :: [(a, [Cuidado])] -> [[Cuidado]]
@@ -236,10 +236,38 @@ plantaoValido plantao = sort (hora plantao) == hora plantao && isUniqueSorted (h
   Dica: enquanto o receituário lista os horários que cada remédio deve ser tomado, o plano de medicamentos  é uma
   disposição ordenada por horário de todos os remédios que devem ser tomados pelo paciente em um certo horário.
 
+  receituarioInvalido4 = [(med4, [8, 17]), (med6, [6]), (med7, [22]), (med8, [8, 23, 22])]
+
+  plano1 :: PlanoMedicamento
+  plano1 = [(6, [med6]), (8, [med4]), (17, [med4]), (22, [med7])]
 -}
 
+rmdups :: Eq a => [a] -> [a]
+rmdups [] = []
+rmdups (x:xs)   
+    | x `elem` xs = rmdups xs
+    | otherwise = x : rmdups xs
+
+soHorarios :: Ord a1 => [(a2, [a1])] -> [a1]
+soHorarios receituario = rmdups (sort (concat [y | y <- map snd receituario]))
+
+grupo :: Eq t => t -> [(a, [t])] -> [a]
+grupo _ [] = []
+grupo a (b:bs)
+  | findMed a (snd b) = fst b : grupo a bs
+  | otherwise = grupo a bs
+
+grupoItens :: Eq t => [t] -> [(a, [t])] -> [[a]]
+grupoItens [] _ = []
+grupoItens (a:as) receituario = grupo a receituario : grupoItens as receituario
+
+fazReceita :: [a] -> [b] -> [(a, b)]
+fazReceita [] _ = []
+fazReceita _ [] = []
+fazReceita (a:as) (b:bs) = (a, b) : fazReceita (as) (bs)
+
 geraPlanoReceituario :: Receituario -> PlanoMedicamento
-geraPlanoReceituario = undefined
+geraPlanoReceituario receituario = fazReceita (soHorarios receituario) ( grupoItens (soHorarios receituario) receituario)
 
 {- QUESTÃO 8  VALOR: 1,0 ponto
 
