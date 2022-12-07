@@ -1,4 +1,3 @@
-import Data.List
 import Data.Char
 import Data.String
 
@@ -51,6 +50,12 @@ Defina funções que simulem o comportamento descrito acima e que estejam de aco
 modelo de dados.
 
 -}
+
+-- Definição de quickSort que será utilizada em diversas questões.
+
+quickSort :: Ord a => [a] -> [a]
+quickSort [] = []
+quickSort (a:as) = quickSort [e | e <- as, e <= a] ++ [a] ++ quickSort [ e | e <- as, e > a]
 
 {-
 
@@ -133,7 +138,7 @@ consultarMedicamento m (x:xs)
 
 demandaMedicamentos :: Receituario -> EstoqueMedicamentos
 demandaMedicamentos [] = []
-demandaMedicamentos r = sort [(a, length b) | (a, b) <- r]
+demandaMedicamentos r = quickSort [(a, length b) | (a, b) <- r]
 
 {-
    QUESTÃO 5  VALOR: 1,0 ponto, sendo 0,5 para cada função.
@@ -162,16 +167,16 @@ isUniqueSorted (x:xb:xs)
 checkIfSorted :: Ord a => [[a]] -> Bool
 checkIfSorted [] = True
 checkIfSorted (x:xs)
-   | sort x == x && isUniqueSorted (sort x) = True && checkIfSorted xs
+   | quickSort x == x && isUniqueSorted (quickSort x) = True && checkIfSorted xs
    | otherwise = False
 
 receituarioValido :: Receituario -> Bool
 receituarioValido [] = True
-receituarioValido r =  sort [a | (a, b) <- r] == [a | (a, b) <- r] && checkIfSorted ([b | (a, b) <- r])
+receituarioValido r =  quickSort [a | (a, b) <- r] == [a | (a, b) <- r] && checkIfSorted ([b | (a, b) <- r])
 
 planoValido :: PlanoMedicamento -> Bool
 planoValido [] = True
-planoValido p = sort [a | (a, b) <- p] == [a | (a, b) <- p] && checkIfSorted ([b | (a, b) <- p])
+planoValido p = quickSort [a | (a, b) <- p] == [a | (a, b) <- p] && checkIfSorted ([b | (a, b) <- p])
 
 {-
 
@@ -241,7 +246,7 @@ tudoLimpo (a:as) (b:bs) = (a,b) : tudoLimpo (as) (bs)
 checkRemedios :: Ord a => [[a]] -> Bool
 checkRemedios [] = True
 checkRemedios (a:as)
-    | a == sort a && isUniqueSorted (sort a) && checkRemedios as = True
+    | a == quickSort a && isUniqueSorted (quickSort a) && checkRemedios as = True
     | otherwise = False
 
 -- Usa a função tudoLimpo para criar uma lista de tuplas, nas quais a priemira posição é
@@ -273,7 +278,7 @@ checkUniqueAll :: [(a, [Cuidado])] -> Bool
 checkUniqueAll plantao = isAllTrue (map checkUnique (makeList plantao))
 
 plantaoValido :: Plantao -> Bool
-plantaoValido plantao = sort (hora plantao) == hora plantao && isUniqueSorted (hora plantao) && checkRemedios (comprarLimpo (plantao)) && checkRemedios (medicarLimpo (plantao)) && checkUniqueAll (plantao)
+plantaoValido plantao = quickSort (hora plantao) == hora plantao && isUniqueSorted (hora plantao) && checkRemedios (comprarLimpo (plantao)) && checkRemedios (medicarLimpo (plantao)) && checkUniqueAll (plantao)
 
 {-
    QUESTÃO 7  VALOR: 1,0 ponto
@@ -298,7 +303,7 @@ rmdups (x:xs)
 -- e ordenadas.
 
 soChaves :: Ord a1 => [(a2, [a1])] -> [a1]
-soChaves receituario = rmdups (sort (concat [y | y <- map snd receituario]))
+soChaves receituario = rmdups (quickSort (concat [y | y <- map snd receituario]))
 
 -- Cria uma lista contendo todos os remédios relacionados a um horário
 -- Ex.: r1 = [("Lactulona",[8,17]),("Pantoprazol",[6]),("Patz",[22])]
