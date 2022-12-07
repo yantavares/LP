@@ -1,6 +1,5 @@
 import Data.List
 import Data.Char
-
 import Data.String
 
 type Medicamento = String
@@ -190,26 +189,34 @@ comprarLista plantao = map (filter comprarConst) (item plantao)
 medicarConst :: Cuidado -> Bool
 medicarConst (Medicar _) = True
 medicarConst _ = False
+comprarConst :: Cuidado -> Bool
 comprarConst (Comprar _ _) = True
 comprarConst _ = False
+medicarLimpo :: [(a, [Cuidado])] -> [[Medicamento]]
 medicarLimpo plantao = map (map (\(Medicar m) -> m)) (medicarLista plantao)
+comprarLimpo :: [(a, [Cuidado])] -> [[Medicamento]]
 comprarLimpo plantao = map (map (\(Comprar m _) -> m)) (comprarLista plantao)
+tudoLimpo :: [a] -> [b] -> [(a, b)]
 tudoLimpo [] _ = []
 tudoLimpo (a:as) (b:bs) = (a,b) : tudoLimpo (as) (bs)
 
+checkRemedios :: Ord a => [[a]] -> Bool
 checkRemedios [] = True
 checkRemedios (a:as)
     | a == sort a && isUniqueSorted (sort a) && checkRemedios as= True
     | otherwise = False
 
+makeList :: [(a, [Cuidado])] -> [([Medicamento], [Medicamento])]
 makeList plantao = tudoLimpo (medicarLimpo plantao) (comprarLimpo plantao)
 
+checkUnique :: Eq t => ([t], [t]) -> Bool
 checkUnique (a,[]) = True
 checkUnique ([a], b) = not (findMed a b) 
 checkUnique ((a:as), b)
     | findMed a b || checkUnique (as, b) = False
     | otherwise = True
   
+checkUniqueAll :: [(a, [Cuidado])] -> [Bool]
 checkUniqueAll plantao = map checkUnique (makeList plantao)
 
 isAllTrue :: [Bool] -> Bool
@@ -327,6 +334,7 @@ plantaoCorreto = undefined
 
 
 -- ! TESTES
+
 med1 :: Medicamento
 med1 = "Adera"
 
