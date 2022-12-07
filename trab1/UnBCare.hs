@@ -63,6 +63,7 @@ Caso o remédio ainda não exista no estoque, o novo estoque a ser retornado dev
 
 -}
 
+-- Função utilizada para retornar se valor encontra-se na lista
 
 findMed :: Eq t => t -> [t] -> Bool
 findMed _ [] = False
@@ -70,11 +71,16 @@ findMed n (x:xs)
     | x == n = True
     | otherwise = findMed n xs
 
+-- Função que adiciona a quantidade a um medicamento já exixtente
+
 replace :: (Eq a, Num b) => (a, b) -> [(a, b)] -> [(a, b)]
 replace _ [] = []
 replace tup (x:xs)
     | fst tup == fst x = (fst tup, snd tup + snd x) : xs
     | otherwise = x : replace tup xs
+
+-- Se o medicamento já existir no estoque, a função replace é utilizada,
+-- se não, o adicionamos ao final do estoque.
 
 comprarMedicamento :: Medicamento -> Quantidade -> EstoqueMedicamentos -> EstoqueMedicamentos
 comprarMedicamento m q e
@@ -128,6 +134,7 @@ consultarMedicamento m (x:xs)
 demandaMedicamentos :: Receituario -> EstoqueMedicamentos
 demandaMedicamentos [] = []
 demandaMedicamentos r = sort [(a, length b) | (a, b) <- r]
+
 {-
    QUESTÃO 5  VALOR: 1,0 ponto, sendo 0,5 para cada função.
 
@@ -140,6 +147,9 @@ demandaMedicamentos r = sort [(a, length b) | (a, b) <- r]
  Defina as funções "receituarioValido" e "planoValido" que verifiquem as propriedades acima e cujos tipos são dados abaixo:
 
  -}
+
+-- Checa se o elemento é único * em uma lista ordenada *
+
 isUniqueSorted :: Eq a => [a] -> Bool
 isUniqueSorted [] = True
 isUniqueSorted [a] = True
@@ -147,19 +157,21 @@ isUniqueSorted (x:xb:xs)
    | x /= xb = True && isUniqueSorted (xb:xs)
    | otherwise = False
 
-checkTime :: Ord a => [[a]] -> Bool
-checkTime [] = True
-checkTime (x:xs)
-   | sort x == x && isUniqueSorted (sort x) = True && checkTime xs
+-- Checa se medicamentos/horários estão ordenados
+
+checkIfSorted :: Ord a => [[a]] -> Bool
+checkIfSorted [] = True
+checkIfSorted (x:xs)
+   | sort x == x && isUniqueSorted (sort x) = True && checkIfSorted xs
    | otherwise = False
 
 receituarioValido :: Receituario -> Bool
 receituarioValido [] = True
-receituarioValido r =  sort [a | (a, b) <- r] == [a | (a, b) <- r] && checkTime ([b | (a, b) <- r])
+receituarioValido r =  sort [a | (a, b) <- r] == [a | (a, b) <- r] && checkIfSorted ([b | (a, b) <- r])
 
 planoValido :: PlanoMedicamento -> Bool
 planoValido [] = True
-planoValido p = sort [a | (a, b) <- p] == [a | (a, b) <- p] && checkTime ([b | (a, b) <- p])
+planoValido p = sort [a | (a, b) <- p] == [a | (a, b) <- p] && checkIfSorted ([b | (a, b) <- p])
 
 {-
 
@@ -177,37 +189,68 @@ planoValido p = sort [a | (a, b) <- p] == [a | (a, b) <- p] && checkTime ([b | (
 
  -}
 
+-- Retorna uma lista com todos os horários
 
 hora :: [(b1, b2)] -> [b1]
 hora plantao = map fst plantao
-item :: [(a, b)] -> [b]
-item plantao = map snd plantao
-medicarLista :: [(a, [Cuidado])] -> [[Cuidado]]
-medicarLista plantao = map (filter medicarConst ) (item plantao)
-comprarLista :: [(a, [Cuidado])] -> [[Cuidado]]
-comprarLista plantao = map (filter comprarConst) (item plantao)
+
+-- Retorna uma lista com todos os medicamentos
+
+medicamento :: [(a, b)] -> [b]
+medicamento plantao = map snd plantao
+
+-- Funções auxiliares utilizadas para a separação entre Medicar e Comprar utilizando filter.
+
 medicarConst :: Cuidado -> Bool
 medicarConst (Medicar _) = True
 medicarConst _ = False
 comprarConst :: Cuidado -> Bool
 comprarConst (Comprar _ _) = True
 comprarConst _ = False
+
+-- Retorna lista com todos os elementos de Medicar
+
+medicarLista :: [(a, [Cuidado])] -> [[Cuidado]]
+medicarLista plantao = map (filter medicarConst ) (medicamento plantao)
+
+-- Retorna lista com todos os elementos de Comprar
+
+comprarLista :: [(a, [Cuidado])] -> [[Cuidado]]
+comprarLista plantao = map (filter comprarConst) (medicamento plantao)
+
+-- Retorna lista com todos os elementos de Medicar limpos (sem o prefixo 'Medicar')
+
 medicarLimpo :: [(a, [Cuidado])] -> [[Medicamento]]
 medicarLimpo plantao = map (map (\(Medicar m) -> m)) (medicarLista plantao)
+
+-- Retorna lista com todos os elementos de Comprar limpos (sem o prefixo 'Comprar')
+
 comprarLimpo :: [(a, [Cuidado])] -> [[Medicamento]]
 comprarLimpo plantao = map (map (\(Comprar m _) -> m)) (comprarLista plantao)
+
+-- Retorna uma lista de tuplas contendo os elementos da primeira lista na posição fst e os
+-- elementos da segunda lista em snd.
+
 tudoLimpo :: [a] -> [b] -> [(a, b)]
 tudoLimpo [] _ = []
 tudoLimpo (a:as) (b:bs) = (a,b) : tudoLimpo (as) (bs)
 
+-- Checa se medicamentos estão em ordem alfabética e não são medicados ou
+-- comprados 2 vezes no mesmo horário.
+
 checkRemedios :: Ord a => [[a]] -> Bool
 checkRemedios [] = True
 checkRemedios (a:as)
-    | a == sort a && isUniqueSorted (sort a) && checkRemedios as= True
+    | a == sort a && isUniqueSorted (sort a) && checkRemedios as = True
     | otherwise = False
+
+-- Usa a função tudoLimpo para criar uma lista de tuplas, nas quais a priemira posição é
+-- a lista de itens medicados e a segunda posição a lista de items comprados.
 
 makeList :: [(a, [Cuidado])] -> [([Medicamento], [Medicamento])]
 makeList plantao = tudoLimpo (medicarLimpo plantao) (comprarLimpo plantao)
+
+-- Dada uma tupla contendo duas listas (a,b) checa se algum elemento de 'a' está contido em 'b'.
 
 checkUnique :: Eq t => ([t], [t]) -> Bool
 checkUnique (a,[]) = True
@@ -216,16 +259,21 @@ checkUnique ((a:as), b)
     | findMed a b || checkUnique (as, b) = False
     | otherwise = True
   
-checkUniqueAll :: [(a, [Cuidado])] -> [Bool]
-checkUniqueAll plantao = map checkUnique (makeList plantao)
+
+-- Checa se todos os elementos de uma lista são iguais a True.
 
 isAllTrue :: [Bool] -> Bool
 isAllTrue [] = True
 isAllTrue (a:as) = a == True && isAllTrue as
 
+-- Aplica a função checkUnique para cada elemento da lista derivada de makeList e checa
+-- se todos os elementos são iguais a True (passou na condição 3 da questão)
+
+checkUniqueAll :: [(a, [Cuidado])] -> Bool
+checkUniqueAll plantao = isAllTrue (map checkUnique (makeList plantao))
 
 plantaoValido :: Plantao -> Bool
-plantaoValido plantao = sort (hora plantao) == hora plantao && isUniqueSorted (hora plantao) && checkRemedios (comprarLimpo (plantao)) && checkRemedios (medicarLimpo (plantao)) && isAllTrue (checkUniqueAll (plantao))
+plantaoValido plantao = sort (hora plantao) == hora plantao && isUniqueSorted (hora plantao) && checkRemedios (comprarLimpo (plantao)) && checkRemedios (medicarLimpo (plantao)) && checkUniqueAll (plantao)
 
 {-
    QUESTÃO 7  VALOR: 1,0 ponto
@@ -236,11 +284,9 @@ plantaoValido plantao = sort (hora plantao) == hora plantao && isUniqueSorted (h
   Dica: enquanto o receituário lista os horários que cada remédio deve ser tomado, o plano de medicamentos  é uma
   disposição ordenada por horário de todos os remédios que devem ser tomados pelo paciente em um certo horário.
 
-  receituarioInvalido4 = [(med4, [8, 17]), (med6, [6]), (med7, [22]), (med8, [8, 23, 22])]
-
-  plano1 :: PlanoMedicamento
-  plano1 = [(6, [med6]), (8, [med4]), (17, [med4]), (22, [med7])]
 -}
+
+-- Remove itens duplicados de uma lista
 
 rmdups :: Eq a => [a] -> [a]
 rmdups [] = []
@@ -248,8 +294,15 @@ rmdups (x:xs)
     | x `elem` xs = rmdups xs
     | otherwise = x : rmdups xs
 
+-- Retorna uma lista contendo as "chaves" do plano (horários), sem duplicatas
+-- e ordenadas.
+
 soChaves :: Ord a1 => [(a2, [a1])] -> [a1]
 soChaves receituario = rmdups (sort (concat [y | y <- map snd receituario]))
+
+-- Cria uma lista contendo todos os remédios relacionados a um horário
+-- Ex.: r1 = [("Lactulona",[8,17]),("Pantoprazol",[6]),("Patz",[22])]
+--      grupo 8 r1 => ["Lactulona"]
 
 grupo :: Eq t => t -> [(a, [t])] -> [a]
 grupo _ [] = []
@@ -257,9 +310,14 @@ grupo a (b:bs)
   | findMed a (snd b) = fst b : grupo a bs
   | otherwise = grupo a bs
 
+-- Aplica a função grupo a cada horário presente no receituario
+
 grupoItens :: Eq t => [t] -> [(a, [t])] -> [[a]]
 grupoItens [] _ = []
 grupoItens (a:as) receituario = grupo a receituario : grupoItens as receituario
+
+-- Dadas duas listas, retorna uma lista de tuplas contendo elementos da primeira lista em fst
+-- e da segunda lista em snd. Assim, unimos os horários aos seus respectivos medicamentos.
 
 receitaPlano :: [a] -> [b] -> [(a, b)]
 receitaPlano [] _ = []
@@ -278,6 +336,8 @@ geraPlanoReceituario receituario = receitaPlano (soChaves receituario) ( grupoIt
  geraReceituarioPlano com base em geraPlanoReceituario ?
 
 -}
+
+-- Mesma coisa da questão anterior
 
 geraReceituarioPlano :: PlanoMedicamento -> Receituario
 geraReceituarioPlano plano = receitaPlano (soChaves plano) ( grupoItens (soChaves plano) plano)
