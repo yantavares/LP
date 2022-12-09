@@ -1,3 +1,6 @@
+module Root.Exercicios.UnBCare where
+import Root.Modelo.ModeloDados
+
 {-
  *** Aluno: Yan Tavares de Oliveira
  *** Matricula: 202014323
