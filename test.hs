@@ -22,6 +22,9 @@ compose f g x = f (g x)
 add1 :: Int -> Int
 add1 x = x + 1
 
+add2 :: Int -> Int
+add2 x = x + 2
+
 mult2 :: Num a => a -> a
 mult2 x = x * 2
 
@@ -173,3 +176,13 @@ data Tree a = Leaf | Branch a (Tree a) (Tree a)
 depth :: (Num a1, Ord a1) => Tree a2 -> a1
 depth Leaf = 0
 depth (Branch _ ae ad) = 1 + max (depth ae) (depth ad)
+
+
+-- PEGA 2 FUNÇÕES E APLICA EM X DEPENDENDO DO VALOR DE A
+-- Ex man add1 add2 [1,0,0] 12   ---->     16
+man :: (Eq a, Num a) => (b -> b) -> (b -> b) -> [a] -> b -> b
+man _ _ [] x = x
+man f1 f2 (a:as) x
+    | a == 0 = (f1 . (man f1 f2 as)) x 
+    | otherwise = (f2 . (man f1 f2 as)) x 
+

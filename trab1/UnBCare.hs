@@ -28,7 +28,7 @@ instance Show Cuidado where
   show (Medicar m) = "Ministrar medicamento: " ++ m
 
 {-
- *** Aluno: Yan Tavares
+ *** Aluno: Yan Tavares de Oliveira
  *** Matricula: 202014323
  
 
@@ -354,10 +354,65 @@ resultando em novo estoque. A execução consiste em desempenhar, sequencialment
 Caso o estoque acabe antes de terminar a execução do plantão, o resultado da função deve ser Nothing. Caso contrário, o resultado
 deve ser Just v, onde v é o valor final do estoque de medicamentos
 
+plantao1 :: Plantao
+plantao1 =
+  [ (6, [Medicar med6]),
+    (8, [Medicar med4]),
+    (17, [Medicar med4]),
+    (22, [Medicar med7])
+  ]
+
+estoque1 :: EstoqueMedicamentos
+estoque1 = [(med4, 10), (med6, 5), (med7, 0)]
+
 -}
 
+-- Retorna uma lista de tuplas contendo todos os medicamentos a serem comprados
+-- e suas respectivas quantidades. [(med1, qt1), (med2, qt2) ... ]
+
+comprarQt :: [(a, [Cuidado])] -> [(Medicamento, Quantidade)]
+comprarQt plantao = concat (map (map (\(Comprar m q) -> (m,q))) (comprarLista plantao))
+
+-- Dada uma tupla no formato (med1, qt1), compra qt1 unidades de med1
+
+compraPlantao :: (Medicamento, Quantidade) -> EstoqueMedicamentos -> EstoqueMedicamentos
+compraPlantao (a,b) estoque = comprarMedicamento a b estoque
+
+-- Modificação da função tomarMedicamento (não há necessidade do Maybe)
+
+tomarMedicamento2 :: Medicamento -> EstoqueMedicamentos -> EstoqueMedicamentos
+tomarMedicamento2 m e 
+  | findMed m [x | (x, m) <- e] == True = (replace (m, -1) e)
+
+-- Realiza as medicações contidas no plano e atualiza o estoque
+
+executaMed :: [(a, [Cuidado])] -> EstoqueMedicamentos -> EstoqueMedicamentos
+executaMed plantao estoque  = auxMed (tomarMedicamento2) (concat (medicarLimpo plantao)) estoque
+-- Fiquei muito orgulhoso da implementação desta função. Dada uma lista de medicamentos,
+-- aplica a função tomarMedicamento2 a cada medicamento, atualizando o valor do estoque
+-- recursivamente.
+    where auxMed :: (t -> b -> b) -> [t] -> b -> b
+          auxMed _ [] est = est
+          auxMed f1 (a:as) est = (f1 a . (auxMed f1 as)) est
+
+-- Realiza as compras contidas no plano e atualiza o estoque
+
+executaCompra :: [(a, [Cuidado])] -> EstoqueMedicamentos -> EstoqueMedicamentos
+executaCompra plantao estoque  = auxCompra (compraPlantao) (comprarQt plantao) estoque
+    where auxCompra :: ((a, b1) -> b2 -> b2) -> [(a, b1)] -> b2 -> b2
+          auxCompra _ [] est = est
+          auxCompra f1 ((a,b):as) est = (f1 (a,b) . (auxCompra f1 as)) est
+
+-- Aplica as funções executaCompra e ExecutaMedicamento. Se algum valor do receituário for <= 0,
+-- retorna nothing.
+
 executaPlantao :: Plantao -> EstoqueMedicamentos -> Maybe EstoqueMedicamentos
-executaPlantao = undefined
+executaPlantao plantao estoque
+  | length [b | (a,b) <- executaPlantaoAux plantao estoque, b < 1] == 0 = Just (executaPlantaoAux plantao estoque)
+  | otherwise = Nothing     
+      where executaPlantaoAux :: Plantao -> EstoqueMedicamentos -> EstoqueMedicamentos
+            executaPlantaoAux plantao estoque = ((executaMed plantao) . (executaCompra plantao)) estoque
+
 
 {-
 QUESTÃO 10 VALOR: 1,0 ponto
