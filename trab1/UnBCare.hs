@@ -84,10 +84,16 @@ replace tup (x:xs)
 -- Se o medicamento já existir no estoque, a função replace é utilizada,
 -- se não, o adicionamos ao final do estoque.
 
-comprarMedicamento :: Medicamento -> Quantidade -> EstoqueMedicamentos -> EstoqueMedicamentos
-comprarMedicamento m q e
+comprarMedicamento2 :: Medicamento -> Quantidade -> EstoqueMedicamentos -> EstoqueMedicamentos
+comprarMedicamento2 m q e
     | findMed m [x | (x, m) <- e] == True = replace (m,q) e
     | otherwise = (m, q) : e
+
+comprarMedicamento m q [] = [(m,q)]
+comprarMedicamento m q (a:as)
+  | not (m `elem` [m | (m, q) <- (a:as)]) = (m,q) : (a:as)
+  | m == fst a = (m, (snd a) + q) : as
+  | otherwise = a : comprarMedicamento m q as
     
 {-
    QUESTÃO 2, VALOR: 1,0 ponto
@@ -99,11 +105,16 @@ onde v é o novo estoque.
 
 -}
 
-tomarMedicamento :: Medicamento -> EstoqueMedicamentos -> Maybe EstoqueMedicamentos
-tomarMedicamento _ [] = Nothing
-tomarMedicamento m e
+tomarMedicamento3 :: Medicamento -> EstoqueMedicamentos -> Maybe EstoqueMedicamentos
+tomarMedicamento3 _ [] = Nothing
+tomarMedicamento3 m e
    | findMed m [x | (x, m) <- e] == True = Just (replace (m, -1) e)
    | otherwise = Nothing
+
+tomarMedicamento _ [] = Nothing
+tomarMedicamento m e
+  | m `elem` [m | (m, q) <- e] = Just (comprarMedicamento m (-1) e)
+  | otherwise = Nothing
 
 {-
    QUESTÃO 3  VALOR: 1,0 ponto
