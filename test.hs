@@ -137,6 +137,10 @@ foldl2 f acc (a:as) = foldl2 f (f acc a) as
 foldFac :: (Num b, Enum b) => b -> b
 foldFac num = foldr (*) 1 [2..num]
 
+fold :: (t -> t -> t) -> [t] -> t
+fold f [a]    = a
+fold f (a:as) = f a (fold f as)
+
 twice :: (a -> a) -> a -> a
 twice f = f . f
 
