@@ -183,7 +183,7 @@ depth (Branch _ ae ad) = 1 + max (depth ae) (depth ad)
 
 
 -- PEGA 2 FUNÇÕES E APLICA EM X DEPENDENDO DO VALOR DE A
--- Ex man add1 add2 [1,0,0] 12   ---->     16
+-- Ex man add1 add2 [1,0,0] 12 ----> 16
 man :: (Eq a, Num a) => (b -> b) -> (b -> b) -> [a] -> b -> b
 man _ _ [] x = x
 man f1 f2 (a:as) x
