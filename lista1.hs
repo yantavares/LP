@@ -71,8 +71,16 @@ isDecSorted2 [] = True
 isDecSorted2 [a] = True
 isDecSorted2 (xa:xb:xs) = xa >= xb && isDecSorted2 xs
 
--- ? iii)
+--  iii)
+fold :: (t -> t -> t) -> [t] -> t
+fold f [a]    = a
+fold f (a:as) = f a (fold f as)
 
+isOrdered :: [Int] -> Bool
+isOrdered (x:xs) = fold (&&) (map isOrderedPair (zip (x:xs) (xs)))
+
+isOrderedPair :: (Int, Int) -> Bool
+isOrderedPair (x, y) = x <= y
 
 -- ? 6)
 -- Resolva em Haskell o seguinte problema: a partir de duas notas das provas de cada aluno,
