@@ -92,7 +92,6 @@ eval (Add e1 e2) = (eval e1) + (eval e2)
 eval (Sub e1 e2) = (eval e1) - (eval e2)
 eval (Mult e1 e2) = (eval e1) * (eval e2)
 
-
 -- ! 5)
 
 addNum :: Num p => p -> p -> p
