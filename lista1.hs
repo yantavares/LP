@@ -1,6 +1,7 @@
 import Data.List
 
---  todo Ex 1
+-- ! 1)
+
 --  a)
 diffList :: Eq a => [a] -> [a] -> [a]
 diffList [] _ = []
@@ -82,7 +83,26 @@ isOrdered (x:xs) = fold (&&) (map isOrderedPair (zip (x:xs) (xs)))
 isOrderedPair :: (Int, Int) -> Bool
 isOrderedPair (x, y) = x <= y
 
--- ? 6)
+-- ! 2)
+type Test = Int
+data Expr = Lit Test | Add Expr Expr | Sub Expr Expr | Mult Expr Expr
+        deriving Show
+eval (Lit n) = n
+eval (Add e1 e2) = (eval e1) + (eval e2)
+eval (Sub e1 e2) = (eval e1) - (eval e2)
+eval (Mult e1 e2) = (eval e1) * (eval e2)
+
+
+-- ! 5)
+
+addNum :: Num p => p -> p -> p
+addNum n = h
+  where h m = n + m
+
+addNum2 :: Num a => a -> a -> a
+addNum2 n = (n+)
+
+-- ! 6)
 -- Resolva em Haskell o seguinte problema: a partir de duas notas das provas de cada aluno,
 -- determinar a lista dos alunos aprovados, com suas respectivas médias. O resultado deve estar
 -- ordenado crescentemente pela média aritmética das notas. A aprovação ocorre se, e somente se, tal
