@@ -174,13 +174,15 @@ getEvens = filter ((==0) . (`mod` 2))
 data Aluno = Yan Int | Renato String | GuiGo Float
         deriving Show
 
-data Tree a = Leaf | Branch a (Tree a) (Tree a)
+data Tree = Leaf | Branch Int (Tree) (Tree)
         deriving Show
 
-depth :: (Num a1, Ord a1) => Tree a2 -> a1
+depth :: Num a => Tree -> a
 depth Leaf = 0
-depth (Branch _ ae ad) = 1 + max (depth ae) (depth ad)
+depth (Branch _ ae ad) = 1 + depth ae + depth ad
 
+sumTree Leaf = 0
+sumTree (Branch n ae ad) = n + sumTree ae + sumTree ad
 
 -- PEGA 2 FUNÇÕES E APLICA EM X DEPENDENDO DO VALOR DE A
 -- Ex man add1 add2 [1,0,0] 12 ----> 16
