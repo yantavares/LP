@@ -57,12 +57,16 @@ eval context x = case x of
   EInt n -> ValorInt n
   EVar id -> lookup context (getStr id)
   EStr str -> ValorStr str
--- adicione aqui um padrao e comportamento associado a expressao Or
--- adicione aqui um padrao e comportamento associado a expressao And
--- adicione aqui um padrao e comportamento associado a expressao Not
--- adicione aqui um padrao e comportamento associado ao literal true
--- adicione aqui um padrao e comportamento associado ao literal false
-
+  -- adicione abaixo um padrao e comportamento associado a expressao Or
+  EOr  exp0 exp -> ValorBool (b (eval context exp0) || b (eval context exp))
+  -- adicione abaixo um padrao e comportamento associado a expressao And
+  EAnd exp0 exp -> ValorBool (b (eval context exp0) && b (eval context exp))
+  -- adicione abaixo um padrao e comportamento associado a expressao Not
+  ENot exp -> ValorBool (not (b (eval context exp)))
+  -- adicione abaixo um padrao e comportamento associado ao literal true
+  ETrue -> ValorBool True
+  -- adicione abaixo um padrao e comportamento associado ao literal false
+  EFalse -> ValorBool False
 
 getStr :: Ident -> String
 getStr (Ident s) = s

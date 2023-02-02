@@ -17,6 +17,12 @@ execute context x = case x of
     if ((eval context exp) /= 0)
       then execute (execute context stm) (SWhile exp stm)
       else context
+
+  SdoWhile stm exp -> 
+    if eval (execute context stm) exp == 0
+    then execute context stm
+    else execute (execute context stm) (SdoWhile stm exp)
+
   {- trate aqui o caso de o comando "x" ser um comando "SdoWhile"
    dica: uma solucao mais curta tem 1 linha, e uma solucao mais "longa" tem menos de 5 linhas
   -}
